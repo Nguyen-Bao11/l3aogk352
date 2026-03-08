@@ -1,6 +1,7 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import { autoUpdate } from "./autoUpdate.js";
 
 dotenv.config();
 
@@ -11,8 +12,11 @@ app.use(express.static("public"));
 
 console.log("API KEY:", process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌");
 
+// 🔄 Auto Update check when server starts
+autoUpdate();
 
-// 🌐 Internet Search Function
+
+// 🌐 Internet Search
 async function searchInternet(query) {
 
   try {
@@ -42,14 +46,14 @@ async function searchInternet(query) {
 }
 
 
-
+// 💬 Chat API
 app.post("/chat", async (req, res) => {
 
   try {
 
     const userMessage = req.body.message;
 
-    // 🌐 lấy dữ liệu internet
+    // 🌐 get internet info
     const internetInfo = await searchInternet(userMessage);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -70,32 +74,18 @@ app.post("/chat", async (req, res) => {
           {
             role: "system",
             content: `
-You are Siggy, the Arcane Guardian of Ritual.
-
-IMPORTANT:
-- Detect the language of the user's message.
-- Always reply in the same language as the user.
-- If the user switches language, switch too.
-
-Personality:
-- mysterious
-- wise
-- calm
-- slightly mystical but friendly
+You are Siggy, the Arcane Guardian.
 
 Rules:
-- You can answer questions about daily life, knowledge, technology, or general topics.
-- Use internet information when useful.
-- Keep answers helpful and concise.
-
-You are not just an AI assistant.
-You are a mystical guide called Siggy.
+- Detect user's language and reply in the same language.
+- Use internet info if useful.
+- Be calm, wise, mysterious but helpful.
 `
           },
 
           {
             role: "system",
-            content: "Internet information: " + internetInfo
+            content: "Internet info: " + internetInfo
           },
 
           {
@@ -132,12 +122,16 @@ You are a mystical guide called Siggy.
 
 });
 
+
+// 🌐 Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("Siggy running on port", PORT);
 });
 
+
+// 💾 Chat history API
 app.get("/chat-data", (req, res) => {
 
 res.send(`
@@ -146,4 +140,4 @@ res.send(`
 </div>
 `)
 
-})
+});
