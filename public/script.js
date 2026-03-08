@@ -20,14 +20,14 @@ msg.className = "message"
 
 if(user){
 msg.classList.add("user")
-// USER
+
 msg.innerHTML = `
 <div class="bubble">${text}</div>
 <img class="avatar user-avatar" src="user.png">
 `
 }
 else{
-// BOT
+
 msg.innerHTML = `
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">${text}</div>
@@ -42,7 +42,6 @@ chat.scrollTop = chat.scrollHeight
 send.onclick = () => {
 
 const text = input.value
-
 if(!text) return
 
 hideIntro()
@@ -139,6 +138,8 @@ typing.remove()
 
 }
 
+/* FILE ATTACH */
+
 const attach = document.getElementById("attach")
 const fileInput = document.getElementById("fileInput")
 
@@ -151,7 +152,37 @@ fileInput.onchange = () => {
 const file = fileInput.files[0]
 if(!file) return
 
+hideIntro()
+
+// nếu là ảnh → hiển thị preview
+if(file.type.startsWith("image/")){
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+const msg = document.createElement("div")
+msg.className = "message user"
+
+msg.innerHTML = `
+<div class="bubble">
+<img src="${e.target.result}" style="max-width:220px;border-radius:12px;">
+</div>
+<img class="avatar user-avatar" src="user.png">
+`
+
+chat.appendChild(msg)
+chat.scrollTop = chat.scrollHeight
+
+}
+
+reader.readAsDataURL(file)
+
+}else{
+
 addMessage("📎 " + file.name, true)
+
+}
 
 const formData = new FormData()
 formData.append("file", file)
@@ -174,6 +205,8 @@ addMessage("Siggy could not analyze the artifact ⚡",false)
 
 }
 
+/* VOICE */
+
 const voice = document.getElementById("voice")
 
 const recognition = new webkitSpeechRecognition()
@@ -188,17 +221,17 @@ recognition.start()
 recognition.onresult = (event) => {
 
 const text = event.results[0][0].transcript
-
 input.value = text
 
 }
+
+/* MODE */
 
 const mode = document.getElementById("mode")
 
 mode.onchange = () => {
 
 const selected = mode.value
-
 console.log("Mode:", selected)
 
 }
