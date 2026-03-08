@@ -204,7 +204,7 @@ console.log("Mode:", selected)
 
 }
 
-const fileInput = document.getElementById("fileInput");
+const fileInput = document.getElementById("imageUpload");
 
 fileInput.onchange = async function () {
     const file = fileInput.files[0];
