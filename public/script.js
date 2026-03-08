@@ -307,3 +307,13 @@ const selected = mode.value
 console.log("Mode:", selected)
 
 }
+
+app.get("/chat-data", (req, res) => {
+
+res.send(`
+<div class="message bot">
+<div class="bubble">Siggy is watching the stars ✨</div>
+</div>
+`)
+
+})
