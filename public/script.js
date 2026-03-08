@@ -2,6 +2,16 @@ const chat = document.getElementById("chat")
 const input = document.getElementById("input")
 const send = document.getElementById("send")
 
+/* CHAT HISTORY */
+
+let history = JSON.parse(localStorage.getItem("siggy_history")) || []
+
+history.forEach(msg=>{
+addMessage(msg.text,msg.user)
+})
+
+/* ENTER SEND */
+
 input.addEventListener("keydown", function(e){
 
 if(e.key === "Enter" && !e.shiftKey){
@@ -11,33 +21,81 @@ send.click()
 
 })
 
-function addMessage(text, user){
+/* ADD MESSAGE */
 
-const chat = document.getElementById("chat")
+function addMessage(text, user){
 
 const msg = document.createElement("div")
 msg.className = "message"
 
 if(user){
+
 msg.classList.add("user")
 
 msg.innerHTML = `
 <div class="bubble">${text}</div>
 <img class="avatar user-avatar" src="user.png">
 `
-}
-else{
+
+}else{
 
 msg.innerHTML = `
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">${text}</div>
 `
+
 }
-  
+
 chat.appendChild(msg)
+
+history.push({
+text:text,
+user:user
+})
+
+localStorage.setItem("siggy_history",JSON.stringify(history))
+
 chat.scrollTop = chat.scrollHeight
 
 }
+
+/* TYPING EFFECT */
+
+function typeEffect(text,callback){
+
+let i = 0
+let output = ""
+
+const interval = setInterval(()=>{
+
+output += text[i]
+i++
+
+callback(output)
+
+if(i >= text.length){
+clearInterval(interval)
+}
+
+},15)
+
+}
+
+/* SPEAK */
+
+function speak(text){
+
+const speech = new SpeechSynthesisUtterance(text)
+
+speech.lang = "en-US"
+speech.rate = 1
+speech.pitch = 1
+
+speechSynthesis.speak(speech)
+
+}
+
+/* SEND MESSAGE */
 
 send.onclick = () => {
 
@@ -65,7 +123,17 @@ message:text
 .then(data=>{
 
 removeTyping()
-addMessage(data.reply,false)
+
+addMessage("",false)
+
+const bubbles = document.querySelectorAll(".message .bubble")
+const lastBubble = bubbles[bubbles.length-1]
+
+typeEffect(data.reply,(t)=>{
+lastBubble.innerText = t
+})
+
+speak(data.reply)
 
 })
 .catch(err=>{
@@ -75,7 +143,7 @@ addMessage("Siggy lost connection to the arcane realm... ⚡",false)
 
 }
 
-/* particles */
+/* PARTICLES */
 
 tsParticles.load("tsparticles",{
 particles:{
@@ -96,23 +164,28 @@ value:2
 }
 })
 
+/* INTRO */
+
 let startedChat = false
 
 function hideIntro(){
+
 if(startedChat) return
 startedChat = true
 
 document.body.classList.add("chat-mode")
 
 const intro = document.querySelector(".title-zone")
+
 if(intro){
 intro.classList.add("hide")
 }
+
 }
 
-function botTyping(){
+/* BOT TYPING */
 
-const chat = document.getElementById("chat")
+function botTyping(){
 
 const typing = document.createElement("div")
 typing.className = "message bot typing"
@@ -154,7 +227,6 @@ if(!file) return
 
 hideIntro()
 
-// nếu là ảnh → hiển thị preview
 if(file.type.startsWith("image/")){
 
 const reader = new FileReader()
