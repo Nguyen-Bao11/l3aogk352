@@ -12,7 +12,8 @@ app.use(express.static("public"));
 
 console.log("API KEY:", process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌");
 
-// 🔄 Auto Update check when server starts
+
+// 🔄 Auto Update khi khởi động
 autoUpdate();
 
 
@@ -46,6 +47,7 @@ async function searchInternet(query) {
 }
 
 
+
 // 💬 Chat API
 app.post("/chat", async (req, res) => {
 
@@ -53,7 +55,7 @@ app.post("/chat", async (req, res) => {
 
     const userMessage = req.body.message;
 
-    // 🌐 get internet info
+    // 🌐 lấy thông tin internet
     const internetInfo = await searchInternet(userMessage);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -74,12 +76,12 @@ app.post("/chat", async (req, res) => {
           {
             role: "system",
             content: `
-You are Siggy, the Arcane Guardian.
+You are Siggy, a mystical AI guide.
 
 Rules:
-- Detect user's language and reply in the same language.
-- Use internet info if useful.
-- Be calm, wise, mysterious but helpful.
+- Detect the user's language
+- Always reply in the same language
+- Be wise, calm and helpful
 `
           },
 
@@ -102,8 +104,13 @@ Rules:
     const data = await response.json();
 
     if (!data.choices) {
+
       console.log(data);
-      return res.json({ reply: "⚠ AI connection failed." });
+
+      return res.json({
+        reply: "⚠ AI connection failed."
+      });
+
     }
 
     res.json({
@@ -123,15 +130,19 @@ Rules:
 });
 
 
+
 // 🌐 Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Siggy running on port", PORT);
+
+  console.log("🚀 Siggy running on port", PORT);
+
 });
 
 
-// 💾 Chat history API
+
+// 💾 Chat data test
 app.get("/chat-data", (req, res) => {
 
 res.send(`
