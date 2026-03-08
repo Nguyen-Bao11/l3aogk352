@@ -137,3 +137,13 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Siggy running on port", PORT);
 });
+
+app.get("/chat-data", (req, res) => {
+
+res.send(`
+<div class="message bot">
+<div class="bubble">Siggy is watching the stars ✨</div>
+</div>
+`)
+
+})
