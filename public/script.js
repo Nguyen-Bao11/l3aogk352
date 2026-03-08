@@ -153,7 +153,35 @@ const file = fileInput.files[0]
 
 if(!file) return
 
+// nếu là ảnh
+if(file.type.startsWith("image/")){
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+const msg = document.createElement("div")
+msg.className = "message user"
+
+msg.innerHTML = `
+<div class="bubble image-bubble">
+<img src="${e.target.result}" class="chat-image">
+</div>
+<img class="avatar user-avatar" src="user.png">
+`
+
+chat.appendChild(msg)
+chat.scrollTop = chat.scrollHeight
+
+}
+
+reader.readAsDataURL(file)
+
+}else{
+
 addMessage("📎 " + file.name, true)
+
+}
 
 }
 
