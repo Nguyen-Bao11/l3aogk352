@@ -87,30 +87,5 @@ Siggy loves everyone, so ask and Siggy will answer.
 
 <script src="script.js"></script>
 
-
-<!-- BƯỚC 3: AUTO UPDATE CHAT -->
-
-<script>
-
-function loadChat(){
-
-fetch("/chat-data")
-
-.then(res => res.text())
-
-.then(data => {
-
-document.getElementById("chat").innerHTML = data
-
-})
-
-}
-
-setInterval(loadChat,2000)
-
-</script>
-
-
 </body>
 </html>
-<div id="chat"></div>
