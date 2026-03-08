@@ -1,3 +1,19 @@
+const axios = require("axios")
+
+async function searchInternet(query){
+
+const url = "https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json"
+
+const res = await axios.get(url)
+
+if(res.data.Abstract){
+return res.data.Abstract
+}
+
+return "No internet result found."
+
+}
+
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
