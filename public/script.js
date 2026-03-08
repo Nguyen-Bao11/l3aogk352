@@ -203,3 +203,19 @@ const selected = mode.value
 console.log("Mode:", selected)
 
 }
+
+const fileInput = document.getElementById("fileInput");
+
+fileInput.onchange = async function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    // nếu là ảnh
+    if (file.type.startsWith("image/")) {
+        console.log("Đây là ảnh:", file.name);
+    } 
+    // nếu là file khác
+    else {
+        console.log("Đây là file:", file.name);
+    }
+};
