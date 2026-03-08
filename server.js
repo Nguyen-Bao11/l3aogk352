@@ -11,11 +11,46 @@ app.use(express.static("public"));
 
 console.log("API KEY:", process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌");
 
+
+// 🌐 Internet Search Function
+async function searchInternet(query) {
+
+  try {
+
+    const url = "https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json";
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.Abstract) {
+      return data.Abstract;
+    }
+
+    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+      return data.RelatedTopics[0].Text;
+    }
+
+    return "No internet results found.";
+
+  } catch (err) {
+
+    console.log("Search error:", err);
+    return "Internet search failed.";
+
+  }
+
+}
+
+
+
 app.post("/chat", async (req, res) => {
 
   try {
 
     const userMessage = req.body.message;
+
+    // 🌐 lấy dữ liệu internet
+    const internetInfo = await searchInternet(userMessage);
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
 
@@ -31,6 +66,7 @@ app.post("/chat", async (req, res) => {
         model: "meta-llama/llama-3.1-8b-instruct",
 
         messages: [
+
           {
             role: "system",
             content: `
@@ -49,18 +85,24 @@ Personality:
 
 Rules:
 - You can answer questions about daily life, knowledge, technology, or general topics.
-- Never say you lack real-time data.
-- If asked about time/date, estimate based on normal knowledge.
+- Use internet information when useful.
 - Keep answers helpful and concise.
 
 You are not just an AI assistant.
 You are a mystical guide called Siggy.
 `
           },
+
+          {
+            role: "system",
+            content: "Internet information: " + internetInfo
+          },
+
           {
             role: "user",
             content: userMessage
           }
+
         ]
 
       })
