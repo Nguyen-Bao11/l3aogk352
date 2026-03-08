@@ -461,3 +461,26 @@ background:#0c1022 url("data:image/svg+xml;utf8,<svg fill='white' height='20' vi
 background-size:12px;
 padding-right:24px;
 }
+
+.chat-image{
+max-width:220px;
+border-radius:12px;
+display:block;
+animation: popIn .25s ease;
+}
+
+.image-bubble{
+padding:6px;
+background:none;
+}
+
+@keyframes popIn{
+from{
+transform:scale(.8);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
