@@ -1,27 +1,15 @@
-const chat = document.getElementById("chat")
-const input = document.getElementById("input")
-const send = document.getElementById("send")
-
-/* HISTORY */
-
-let history = JSON.parse(localStorage.getItem("siggy_history")) || []
-
-history.forEach(msg=>{
-renderMessage(msg.text,msg.user)
-})
-
-/* ENTER SEND */
+const chat=document.getElementById("chat")
+const input=document.getElementById("input")
+const send=document.getElementById("send")
 
 input.addEventListener("keydown",(e)=>{
-if(e.key==="Enter" && !e.shiftKey){
+if(e.key==="Enter"&&!e.shiftKey){
 e.preventDefault()
 send.click()
 }
 })
 
-/* RENDER MESSAGE */
-
-function renderMessage(text,user){
+function addMessage(text,user){
 
 const msg=document.createElement("div")
 msg.className="message"
@@ -46,26 +34,10 @@ msg.innerHTML=`
 
 chat.appendChild(msg)
 chat.scrollTop=chat.scrollHeight
-}
-
-/* ADD MESSAGE */
-
-function addMessage(text,user){
-
-renderMessage(text,user)
-
-if(text){
-history.push({text,user})
-localStorage.setItem("siggy_history",JSON.stringify(history))
-}
 
 }
-
-/* TYPE EFFECT */
 
 function typeEffect(text,callback){
-
-if(!text) return
 
 let i=0
 let output=""
@@ -85,24 +57,6 @@ clearInterval(interval)
 
 }
 
-/* SPEAK */
-
-function speak(text){
-
-if(!("speechSynthesis" in window)) return
-
-const speech=new SpeechSynthesisUtterance(text)
-
-speech.lang="en-US"
-speech.rate=1
-speech.pitch=1
-
-speechSynthesis.speak(speech)
-
-}
-
-/* SEND */
-
 send.onclick=()=>{
 
 const text=input.value.trim()
@@ -118,7 +72,7 @@ botTyping()
 
 fetch("/chat",{
 method:"POST",
-headers:{ "Content-Type":"application/json"},
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify({message:text})
 })
 .then(res=>res.json())
@@ -126,7 +80,7 @@ body:JSON.stringify({message:text})
 
 removeTyping()
 
-renderMessage("",false)
+addMessage("",false)
 
 const bubbles=document.querySelectorAll(".message .bubble")
 const last=bubbles[bubbles.length-1]
@@ -135,17 +89,13 @@ typeEffect(data.reply,(t)=>{
 last.innerText=t
 })
 
-speak(data.reply)
-
 })
 .catch(()=>{
 removeTyping()
-addMessage("Siggy lost connection to the arcane realm ⚡",false)
+addMessage("Siggy lost connection ⚡",false)
 })
 
 }
-
-/* PARTICLES */
 
 if(window.tsParticles){
 
@@ -153,22 +103,13 @@ tsParticles.load("tsparticles",{
 particles:{
 number:{value:60},
 color:{value:"#a78bfa"},
-links:{
-enable:true,
-color:"#a78bfa",
-distance:150
-},
-move:{
-enable:true,
-speed:1
-},
+links:{enable:true,color:"#a78bfa",distance:150},
+move:{enable:true,speed:1},
 size:{value:2}
 }
 })
 
 }
-
-/* INTRO */
 
 let startedChat=false
 
@@ -187,13 +128,10 @@ intro.classList.add("hide")
 
 }
 
-/* BOT TYPING */
-
 function botTyping(){
 
 const typing=document.createElement("div")
-
-typing.className="message bot typing"
+typing.className="message"
 typing.id="typing"
 
 typing.innerHTML=`
@@ -202,7 +140,6 @@ typing.innerHTML=`
 `
 
 chat.appendChild(typing)
-chat.scrollTop=chat.scrollHeight
 
 }
 
@@ -216,8 +153,6 @@ typing.remove()
 
 }
 
-/* FILE */
-
 const attach=document.getElementById("attach")
 const fileInput=document.getElementById("fileInput")
 
@@ -227,8 +162,6 @@ fileInput.onchange=()=>{
 
 const file=fileInput.files[0]
 if(!file) return
-
-hideIntro()
 
 if(file.type.startsWith("image/")){
 
@@ -240,7 +173,7 @@ const msg=document.createElement("div")
 msg.className="message user"
 
 msg.innerHTML=`
-<div class="bubble image-bubble">
+<div class="bubble">
 <img src="${e.target.result}" class="chat-image">
 </div>
 <img class="avatar user-avatar" src="user.png">
@@ -258,54 +191,22 @@ addMessage("📎 "+file.name,true)
 
 }
 
-const formData=new FormData()
-formData.append("file",file)
-
-botTyping()
-
-fetch("/analyze",{method:"POST",body:formData})
-.then(res=>res.json())
-.then(data=>{
-removeTyping()
-addMessage(data.reply,false)
-})
-.catch(()=>{
-removeTyping()
-addMessage("Siggy could not analyze the artifact ⚡",false)
-})
-
 }
 
-/* VOICE */
-
-const voice=document.getElementById("voice")
-
-const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition
-
-let recognition
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition
 
 if(SpeechRecognition){
 
-recognition=new SpeechRecognition()
+const recognition=new SpeechRecognition()
 
 recognition.lang="en-US"
-recognition.continuous=false
 
-voice.onclick=()=>recognition.start()
+document.getElementById("voice").onclick=()=>recognition.start()
 
 recognition.onresult=(event)=>{
 
-const text=event.results[0][0].transcript
-input.value=text
+input.value=event.results[0][0].transcript
 
 }
 
-}
-
-/* MODE */
-
-const mode=document.getElementById("mode")
-
-mode.onchange=()=>{
-console.log("Mode:",mode.value)
 }
