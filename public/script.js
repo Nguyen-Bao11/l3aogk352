@@ -1,187 +1,186 @@
 const chat = document.getElementById("chat")
 const input = document.getElementById("input")
-
-input.addEventListener("keydown", function(e){
-
-if(e.key === "Enter" && !e.shiftKey){
-e.preventDefault()
-send.click()
-}
-
-})
-
 const send = document.getElementById("send")
+const attach = document.getElementById("attach")
+const fileInput = document.getElementById("fileInput")
 
-function addMessage(text, user){
+let memory = []
 
-const chat = document.getElementById("chat")
+function addMessage(text,user,img=null){
 
 const msg = document.createElement("div")
-msg.className = "message"
+msg.className="message"
 
 if(user){
+
 msg.classList.add("user")
-// USER
-msg.innerHTML = `
-<div class="bubble">${text}</div>
+
+msg.innerHTML=`
+<div class="bubble">
+${img ? `<img src="${img}" style="max-width:200px;border-radius:10px"><br>`:""}
+${text}
+</div>
 <img class="avatar user-avatar" src="user.png">
 `
-}
-else{
-// BOT
-msg.innerHTML = `
+
+}else{
+
+msg.innerHTML=`
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">${text}</div>
 `
 }
-  
+
 chat.appendChild(msg)
-chat.scrollTop = chat.scrollHeight
+chat.scrollTop=chat.scrollHeight
 
 }
 
-send.onclick = () => {
+send.onclick=sendMessage
 
-const text = input.value
+function sendMessage(){
 
+const text=input.value
 if(!text) return
 
-hideIntro()
-
 addMessage(text,true)
+
+memory.push({role:"user",content:text})
 
 input.value=""
 
 botTyping()
 
 fetch("/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+message:text,
+memory:memory
+})
+
+})
+
+.then(res=>res.json())
+.then(data=>{
+
+removeTyping()
+
+memory.push({role:"assistant",content:data.reply})
+
+addMessage(data.reply,false)
+
+})
+
+}
+
+input.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+e.preventDefault()
+sendMessage()
+}
+})
+
+/* IMAGE UPLOAD */
+
+attach.onclick=()=>{
+fileInput.click()
+}
+
+fileInput.onchange=()=>{
+
+const file=fileInput.files[0]
+if(!file) return
+
+const reader=new FileReader()
+
+reader.onload=e=>{
+
+const base64=e.target.result
+
+addMessage("Image sent",true,base64)
+
+botTyping()
+
+fetch("/image",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-message:text
+image:base64
 })
 })
 .then(res=>res.json())
 .then(data=>{
-
 removeTyping()
 addMessage(data.reply,false)
-
-})
-.catch(err=>{
-removeTyping()
-addMessage("Siggy lost connection to the arcane realm... ⚡",false)
 })
 
 }
 
-/* particles */
+reader.readAsDataURL(file)
 
-tsParticles.load("tsparticles",{
-particles:{
-number:{value:60},
-color:{value:"#a78bfa"},
-links:{
-enable:true,
-color:"#a78bfa",
-distance:150
-},
-move:{
-enable:true,
-speed:1
-},
-size:{
-value:2
 }
+
+/* VOICE */
+
+const voice=document.getElementById("voice")
+
+const recognition=new webkitSpeechRecognition()
+
+recognition.lang="auto"
+recognition.continuous=true
+recognition.interimResults=true
+
+voice.onclick=()=>{
+recognition.start()
+voice.classList.add("recording")
 }
-})
 
-let startedChat = false
-
-function hideIntro(){
-if(startedChat) return
-startedChat = true
-
-document.body.classList.add("chat-mode")
-
-const intro = document.querySelector(".title-zone")
-if(intro){
-intro.classList.add("hide")
+recognition.onend=()=>{
+voice.classList.remove("recording")
 }
+
+recognition.onresult=e=>{
+
+let text=""
+
+for(let i=e.resultIndex;i<e.results.length;i++){
+text+=e.results[i][0].transcript
 }
+
+input.value=text
+
+}
+
+/* typing */
 
 function botTyping(){
 
-const chat = document.getElementById("chat")
+const typing=document.createElement("div")
 
-const typing = document.createElement("div")
-typing.className = "message bot typing"
-typing.id = "typing"
+typing.id="typing"
+typing.className="message"
 
-typing.innerHTML = `
+typing.innerHTML=`
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">Siggy is thinking...</div>
 `
 
 chat.appendChild(typing)
-chat.scrollTop = chat.scrollHeight
 
 }
 
 function removeTyping(){
 
-const typing = document.getElementById("typing")
+const typing=document.getElementById("typing")
 
-if(typing){
-typing.remove()
-}
-
-}
-
-const attach = document.getElementById("attach")
-const fileInput = document.getElementById("fileInput")
-
-attach.onclick = () => {
-fileInput.click()
-}
-
-fileInput.onchange = () => {
-
-const file = fileInput.files[0]
-
-if(!file) return
-
-addMessage("📎 " + file.name, true)
-
-}
-
-const voice = document.getElementById("voice")
-
-const recognition = new webkitSpeechRecognition()
-
-recognition.lang = "auto"
-recognition.continuous = false
-
-voice.onclick = () => {
-recognition.start()
-}
-
-recognition.onresult = (event) => {
-
-const text = event.results[0][0].transcript
-
-input.value = text
-
-}
-
-const mode = document.getElementById("mode")
-
-mode.onchange = () => {
-
-const selected = mode.value
-
-console.log("Mode:", selected)
+if(typing) typing.remove()
 
 }
