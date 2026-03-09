@@ -6,6 +6,14 @@ import fs from "fs";
 
 dotenv.config();
 
+const memoryFile = "memory.json";
+
+let memory = [];
+
+if (fs.existsSync(memoryFile)) {
+memory = JSON.parse(fs.readFileSync(memoryFile));
+}
+
 const app = express();
 
 app.use(express.json());
