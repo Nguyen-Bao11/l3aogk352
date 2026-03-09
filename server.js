@@ -63,6 +63,13 @@ app.post("/chat", async (req, res) => {
   try {
 
     const userMessage = req.body.message;
+    
+    memory.push({
+role:"user",
+content:userMessage
+});
+
+fs.writeFileSync(memoryFile, JSON.stringify(memory,null,2));
 
     // 🌐 lấy thông tin internet
     const internetInfo = await searchInternet(userMessage);
@@ -82,10 +89,19 @@ app.post("/chat", async (req, res) => {
 
         messages: [
 
-          {
-            role: "system",
-            content: `
-You are Siggy, a mystical AI guide.
+{
+role:"system",
+content:`You are Siggy, a mystical AI guide`
+},
+
+...memory,
+
+{
+role:"user",
+content:userMessage
+}
+
+]
 
 Rules:
 - Detect the user's language
