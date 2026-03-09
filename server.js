@@ -27,9 +27,43 @@ console.log(
 autoUpdate();
 
 
-// 🌐 Internet Search
-async function searchInternet(query) {
+// =============================
+// 🌐 GOOGLE SEARCH
+// =============================
+async function googleSearch(query) {
   try {
+
+    if (!process.env.GOOGLE_API_KEY || !process.env.GOOGLE_CX) {
+      return "Google search not configured.";
+    }
+
+    const url =
+      `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CX}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!data.items) return "No Google results.";
+
+    return data.items
+      .slice(0, 3)
+      .map(i => `${i.title} - ${i.snippet}`)
+      .join("\n");
+
+  } catch (err) {
+    console.log("Google search error:", err);
+    return "Google search failed.";
+  }
+}
+
+
+// =============================
+// 🌐 DUCKDUCKGO SEARCH
+// =============================
+async function duckSearch(query) {
+
+  try {
+
     const url =
       "https://api.duckduckgo.com/?q=" +
       encodeURIComponent(query) +
@@ -44,17 +78,40 @@ async function searchInternet(query) {
       return data.RelatedTopics[0].Text;
     }
 
-    return "No internet results found.";
+    return "No DuckDuckGo results.";
+
   } catch (err) {
-    console.log("Search error:", err);
-    return "Internet search failed.";
+    console.log("Duck error:", err);
+    return "DuckDuckGo failed.";
   }
+
 }
 
 
-// 💬 Chat API
+// =============================
+// 🌐 INTERNET SEARCH COMBINED
+// =============================
+async function searchInternet(query) {
+
+  const google = await googleSearch(query);
+  const duck = await duckSearch(query);
+
+  return `Google Results:
+${google}
+
+DuckDuckGo:
+${duck}`;
+
+}
+
+
+// =============================
+// 💬 CHAT API
+// =============================
 app.post("/chat", async (req, res) => {
+
   try {
+
     const userMessage = req.body.message;
 
     // lưu memory
@@ -63,28 +120,36 @@ app.post("/chat", async (req, res) => {
       content: userMessage
     });
 
+    // giới hạn memory
+    if (memory.length > 20) {
+      memory.shift();
+    }
+
     fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
 
     // lấy info internet
     const internetInfo = await searchInternet(userMessage);
 
     const messages = [
+
       {
         role: "system",
         content: `You are Siggy, a mystical AI guide.
 
 Rules:
-- Detect the user's language
-- Always reply in the same language
-- Be wise, calm and helpful`
+- Detect user's language
+- Always reply same language
+- Use internet info if useful
+- Be wise and helpful`
       },
 
       {
         role: "system",
-        content: "Internet info: " + internetInfo
+        content: "Internet info:\n" + internetInfo
       },
 
       ...memory
+
     ];
 
     const response = await fetch(
@@ -126,15 +191,21 @@ Rules:
     });
 
   } catch (err) {
+
     console.log(err);
+
     res.json({
       reply: "Siggy lost the signal..."
     });
+
   }
+
 });
 
 
-// 🌐 Server
+// =============================
+// 🌐 SERVER
+// =============================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
@@ -142,28 +213,15 @@ app.listen(PORT, () => {
 });
 
 
-// 💾 Chat data test
+// =============================
+// 💾 TEST DATA
+// =============================
 app.get("/chat-data", (req, res) => {
+
   res.send(`
 <div class="message bot">
 <div class="bubble">Siggy is watching the stars ✨</div>
 </div>
 `);
+
 });
-
-async function googleSearch(query){
-
-const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CX}`
-
-const response = await fetch(url)
-
-const data = await response.json()
-
-if(!data.items) return "No results"
-
-return data.items
-.slice(0,3)
-.map(i => `${i.title} - ${i.snippet}`)
-.join("\n")
-
-}
