@@ -2,44 +2,42 @@ const chat = document.getElementById("chat")
 const input = document.getElementById("input")
 const send = document.getElementById("send")
 
-/* CHAT HISTORY */
+/* HISTORY */
 
 let history = JSON.parse(localStorage.getItem("siggy_history")) || []
 
 history.forEach(msg=>{
-addMessage(msg.text,msg.user)
+renderMessage(msg.text,msg.user)
 })
 
 /* ENTER SEND */
 
-input.addEventListener("keydown", function(e){
-
-if(e.key === "Enter" && !e.shiftKey){
+input.addEventListener("keydown",(e)=>{
+if(e.key==="Enter" && !e.shiftKey){
 e.preventDefault()
 send.click()
 }
-
 })
 
-/* ADD MESSAGE */
+/* RENDER MESSAGE */
 
-function addMessage(text, user){
+function renderMessage(text,user){
 
-const msg = document.createElement("div")
-msg.className = "message"
+const msg=document.createElement("div")
+msg.className="message"
 
 if(user){
 
 msg.classList.add("user")
 
-msg.innerHTML = `
+msg.innerHTML=`
 <div class="bubble">${text}</div>
 <img class="avatar user-avatar" src="user.png">
 `
 
 }else{
 
-msg.innerHTML = `
+msg.innerHTML=`
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">${text}</div>
 `
@@ -47,33 +45,39 @@ msg.innerHTML = `
 }
 
 chat.appendChild(msg)
+chat.scrollTop=chat.scrollHeight
+}
 
-history.push({
-text:text,
-user:user
-})
+/* ADD MESSAGE */
 
+function addMessage(text,user){
+
+renderMessage(text,user)
+
+if(text){
+history.push({text,user})
 localStorage.setItem("siggy_history",JSON.stringify(history))
-
-chat.scrollTop = chat.scrollHeight
+}
 
 }
 
-/* TYPING EFFECT */
+/* TYPE EFFECT */
 
 function typeEffect(text,callback){
 
-let i = 0
-let output = ""
+if(!text) return
 
-const interval = setInterval(()=>{
+let i=0
+let output=""
 
-output += text[i]
+const interval=setInterval(()=>{
+
+output+=text.charAt(i)
 i++
 
 callback(output)
 
-if(i >= text.length){
+if(i>=text.length){
 clearInterval(interval)
 }
 
@@ -85,21 +89,23 @@ clearInterval(interval)
 
 function speak(text){
 
-const speech = new SpeechSynthesisUtterance(text)
+if(!("speechSynthesis" in window)) return
 
-speech.lang = "en-US"
-speech.rate = 1
-speech.pitch = 1
+const speech=new SpeechSynthesisUtterance(text)
+
+speech.lang="en-US"
+speech.rate=1
+speech.pitch=1
 
 speechSynthesis.speak(speech)
 
 }
 
-/* SEND MESSAGE */
+/* SEND */
 
-send.onclick = () => {
+send.onclick=()=>{
 
-const text = input.value
+const text=input.value.trim()
 if(!text) return
 
 hideIntro()
@@ -112,38 +118,36 @@ botTyping()
 
 fetch("/chat",{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-message:text
-})
+headers:{ "Content-Type":"application/json"},
+body:JSON.stringify({message:text})
 })
 .then(res=>res.json())
 .then(data=>{
 
 removeTyping()
 
-addMessage("",false)
+renderMessage("",false)
 
-const bubbles = document.querySelectorAll(".message .bubble")
-const lastBubble = bubbles[bubbles.length-1]
+const bubbles=document.querySelectorAll(".message .bubble")
+const last=bubbles[bubbles.length-1]
 
 typeEffect(data.reply,(t)=>{
-lastBubble.innerText = t
+last.innerText=t
 })
 
 speak(data.reply)
 
 })
-.catch(err=>{
+.catch(()=>{
 removeTyping()
-addMessage("Siggy lost connection to the arcane realm... ⚡",false)
+addMessage("Siggy lost connection to the arcane realm ⚡",false)
 })
 
 }
 
 /* PARTICLES */
+
+if(window.tsParticles){
 
 tsParticles.load("tsparticles",{
 particles:{
@@ -158,24 +162,24 @@ move:{
 enable:true,
 speed:1
 },
-size:{
-value:2
-}
+size:{value:2}
 }
 })
 
+}
+
 /* INTRO */
 
-let startedChat = false
+let startedChat=false
 
 function hideIntro(){
 
 if(startedChat) return
-startedChat = true
+startedChat=true
 
 document.body.classList.add("chat-mode")
 
-const intro = document.querySelector(".title-zone")
+const intro=document.querySelector(".title-zone")
 
 if(intro){
 intro.classList.add("hide")
@@ -187,23 +191,24 @@ intro.classList.add("hide")
 
 function botTyping(){
 
-const typing = document.createElement("div")
-typing.className = "message bot typing"
-typing.id = "typing"
+const typing=document.createElement("div")
 
-typing.innerHTML = `
+typing.className="message bot typing"
+typing.id="typing"
+
+typing.innerHTML=`
 <img class="avatar bot-avatar" src="bot.png">
 <div class="bubble">Siggy is thinking...</div>
 `
 
 chat.appendChild(typing)
-chat.scrollTop = chat.scrollHeight
+chat.scrollTop=chat.scrollHeight
 
 }
 
 function removeTyping(){
 
-const typing = document.getElementById("typing")
+const typing=document.getElementById("typing")
 
 if(typing){
 typing.remove()
@@ -211,40 +216,37 @@ typing.remove()
 
 }
 
-/* FILE ATTACH */
+/* FILE */
 
-const attach = document.getElementById("attach")
-const fileInput = document.getElementById("fileInput")
+const attach=document.getElementById("attach")
+const fileInput=document.getElementById("fileInput")
 
-attach.onclick = () => {
-fileInput.click()
-}
+attach.onclick=()=>fileInput.click()
 
-fileInput.onchange = () => {
+fileInput.onchange=()=>{
 
-const file = fileInput.files[0]
+const file=fileInput.files[0]
 if(!file) return
 
 hideIntro()
 
 if(file.type.startsWith("image/")){
 
-const reader = new FileReader()
+const reader=new FileReader()
 
-reader.onload = function(e){
+reader.onload=(e)=>{
 
-const msg = document.createElement("div")
-msg.className = "message user"
+const msg=document.createElement("div")
+msg.className="message user"
 
-msg.innerHTML = `
-<div class="bubble">
-<img src="${e.target.result}" style="max-width:220px;border-radius:12px;">
+msg.innerHTML=`
+<div class="bubble image-bubble">
+<img src="${e.target.result}" class="chat-image">
 </div>
 <img class="avatar user-avatar" src="user.png">
 `
 
 chat.appendChild(msg)
-chat.scrollTop = chat.scrollHeight
 
 }
 
@@ -252,19 +254,16 @@ reader.readAsDataURL(file)
 
 }else{
 
-addMessage("📎 " + file.name, true)
+addMessage("📎 "+file.name,true)
 
 }
 
-const formData = new FormData()
-formData.append("file", file)
+const formData=new FormData()
+formData.append("file",file)
 
 botTyping()
 
-fetch("/analyze",{
-method:"POST",
-body:formData
-})
+fetch("/analyze",{method:"POST",body:formData})
 .then(res=>res.json())
 .then(data=>{
 removeTyping()
@@ -279,31 +278,34 @@ addMessage("Siggy could not analyze the artifact ⚡",false)
 
 /* VOICE */
 
-const voice = document.getElementById("voice")
+const voice=document.getElementById("voice")
 
-const recognition = new webkitSpeechRecognition()
+const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition
 
-recognition.lang = "auto"
-recognition.continuous = false
+let recognition
 
-voice.onclick = () => {
-recognition.start()
+if(SpeechRecognition){
+
+recognition=new SpeechRecognition()
+
+recognition.lang="en-US"
+recognition.continuous=false
+
+voice.onclick=()=>recognition.start()
+
+recognition.onresult=(event)=>{
+
+const text=event.results[0][0].transcript
+input.value=text
+
 }
-
-recognition.onresult = (event) => {
-
-const text = event.results[0][0].transcript
-input.value = text
 
 }
 
 /* MODE */
 
-const mode = document.getElementById("mode")
+const mode=document.getElementById("mode")
 
-mode.onchange = () => {
-
-const selected = mode.value
-console.log("Mode:", selected)
-
+mode.onchange=()=>{
+console.log("Mode:",mode.value)
 }
