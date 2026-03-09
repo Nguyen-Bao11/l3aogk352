@@ -150,3 +150,20 @@ app.get("/chat-data", (req, res) => {
 </div>
 `);
 });
+
+async function googleSearch(query){
+
+const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CX}`
+
+const response = await fetch(url)
+
+const data = await response.json()
+
+if(!data.items) return "No results"
+
+return data.items
+.slice(0,3)
+.map(i => `${i.title} - ${i.snippet}`)
+.join("\n")
+
+}
