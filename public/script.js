@@ -46,9 +46,6 @@ top: chat.scrollHeight,
 behavior: "smooth"
 })
 
-/* SAVE CHAT */
-localStorage.setItem("siggy_chat", chat.innerHTML)
-
 }
 
 /* SEND MESSAGE */
@@ -100,16 +97,8 @@ addMessage("Siggy lost connection to the arcane realm... ⚡",false)
 
 /* LOAD OLD CHAT */
 
-const saved = localStorage.getItem("siggy_chat")
-
-if(saved){
-
-chat.innerHTML = saved
-
-setTimeout(()=>{
-chat.scrollTop = chat.scrollHeight
-},100)
-
+window.onload = function() {
+  chat.innerHTML = "";
 }
 
 /* PARTICLES */
@@ -324,8 +313,3 @@ const data = await response.json()
 res.json(data)
 
 })
-
-window.onload = function() {
-  localStorage.removeItem("siggy_chat");
-  chat.innerHTML = "";
-}
