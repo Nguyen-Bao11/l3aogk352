@@ -13,6 +13,33 @@ send.click()
 
 })
 
+/* LANGUAGE DETECT */
+
+function detectLanguage(text){
+
+const langMap = {
+vi:/[ăâêôơưđ]/i,
+ja:/[\u3040-\u30ff]/,
+ko:/[\uac00-\ud7af]/,
+ru:/[а-яА-Я]/,
+zh:/[\u4e00-\u9fff]/,
+ar:/[\u0600-\u06FF]/,
+hi:/[\u0900-\u097F]/,
+th:/[\u0E00-\u0E7F]/
+}
+
+for(const lang in langMap){
+
+if(langMap[lang].test(text)){
+return lang
+}
+
+}
+
+return "en"
+
+}
+
 /* ADD MESSAGE */
 
 function addMessage(text, user){
@@ -64,6 +91,8 @@ input.value=""
 
 botTyping()
 
+const language = detectLanguage(text)
+
 fetch("/chat",{
 
 method:"POST",
@@ -74,7 +103,7 @@ headers:{
 
 body:JSON.stringify({
 message:text,
-lang:navigator.language
+lang:language
 })
 
 })
@@ -99,7 +128,7 @@ addMessage("Siggy lost connection to the arcane realm... ⚡",false)
 /* LOAD OLD CHAT */
 
 window.onload = function() {
-chat.innerHTML = ""
+chat.innerHTML = "";
 }
 
 /* PARTICLES */
@@ -224,7 +253,7 @@ if ('webkitSpeechRecognition' in window) {
 
 const recognition = new webkitSpeechRecognition()
 
-recognition.lang = navigator.language
+recognition.lang = "auto"
 recognition.continuous = true
 recognition.interimResults = true
 
