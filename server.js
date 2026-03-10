@@ -23,7 +23,7 @@ console.log(
   process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌"
 );
 
-// 🔄 Auto Update khi khởi động
+// 🔄 Auto Update
 autoUpdate();
 
 
@@ -31,6 +31,7 @@ autoUpdate();
 // 🌐 GOOGLE SEARCH
 // =============================
 async function googleSearch(query) {
+
   try {
 
     if (!process.env.GOOGLE_API_KEY || !process.env.GOOGLE_CX) {
@@ -51,9 +52,12 @@ async function googleSearch(query) {
       .join("\n");
 
   } catch (err) {
+
     console.log("Google search error:", err);
     return "Google search failed.";
+
   }
+
 }
 
 
@@ -81,15 +85,17 @@ async function duckSearch(query) {
     return "No DuckDuckGo results.";
 
   } catch (err) {
+
     console.log("Duck error:", err);
     return "DuckDuckGo failed.";
+
   }
 
 }
 
 
 // =============================
-// 🌐 INTERNET SEARCH COMBINED
+// 🌐 INTERNET SEARCH
 // =============================
 async function searchInternet(query) {
 
@@ -113,6 +119,7 @@ app.post("/chat", async (req, res) => {
   try {
 
     const userMessage = req.body.message;
+    const userLang = req.body.lang || "auto";
 
     // lưu memory
     memory.push({
@@ -127,7 +134,7 @@ app.post("/chat", async (req, res) => {
 
     fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
 
-    // lấy info internet
+    // lấy internet info
     const internetInfo = await searchInternet(userMessage);
 
     const messages = [
@@ -137,10 +144,15 @@ app.post("/chat", async (req, res) => {
         content: `You are Siggy, a mystical AI guide.
 
 Rules:
-- Detect user's language
-- Always reply same language
-- Use internet info if useful
-- Be wise and helpful`
+- Detect the user's language.
+- ALWAYS reply in the SAME language as the user.
+- Be clear, helpful and intelligent.
+- Use internet info if relevant.`
+      },
+
+      {
+        role: "system",
+        content: `User language: ${userLang}`
       },
 
       {
@@ -170,10 +182,13 @@ Rules:
     const data = await response.json();
 
     if (!data.choices) {
+
       console.log(data);
+
       return res.json({
         reply: "⚠ AI connection failed."
       });
+
     }
 
     const aiReply = data.choices[0].message.content;
@@ -209,7 +224,9 @@ Rules:
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
+
   console.log("🚀 Siggy running on port", PORT);
+
 });
 
 
