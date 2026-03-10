@@ -73,7 +73,8 @@ headers:{
 },
 
 body:JSON.stringify({
-message:text
+message:text,
+lang:navigator.language
 })
 
 })
@@ -98,7 +99,7 @@ addMessage("Siggy lost connection to the arcane realm... ⚡",false)
 /* LOAD OLD CHAT */
 
 window.onload = function() {
-  chat.innerHTML = "";
+chat.innerHTML = ""
 }
 
 /* PARTICLES */
@@ -223,7 +224,7 @@ if ('webkitSpeechRecognition' in window) {
 
 const recognition = new webkitSpeechRecognition()
 
-recognition.lang = "auto"
+recognition.lang = navigator.language
 recognition.continuous = true
 recognition.interimResults = true
 
@@ -289,27 +290,5 @@ overlay.remove()
 }
 
 }
-
-})
-
-app.post("/search", async (req,res)=>{
-
-const query = req.body.query
-
-const response = await fetch(
-`https://google.serper.dev/search`,
-{
-method:"POST",
-headers:{
-"X-API-KEY":process.env.SERPER_KEY,
-"Content-Type":"application/json"
-},
-body:JSON.stringify({q:query})
-}
-)
-
-const data = await response.json()
-
-res.json(data)
 
 })
