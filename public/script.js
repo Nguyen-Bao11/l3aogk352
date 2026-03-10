@@ -68,10 +68,10 @@ msg.innerHTML = `
 chat.appendChild(msg)
 
 /* AUTO SCROLL FIX */
-chat.scrollTo({
-top: chat.scrollHeight,
-behavior: "smooth"
-})
+
+setTimeout(()=>{
+chat.scrollTop = chat.scrollHeight
+},50)
 
 }
 
@@ -189,7 +189,11 @@ typing.innerHTML = `
 
 chat.appendChild(typing)
 
+/* SCROLL FIX */
+
+setTimeout(()=>{
 chat.scrollTop = chat.scrollHeight
+},50)
 
 }
 
