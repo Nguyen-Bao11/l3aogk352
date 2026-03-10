@@ -324,3 +324,8 @@ const data = await response.json()
 res.json(data)
 
 })
+
+window.onload = function() {
+  localStorage.removeItem("siggy_chat");
+  chat.innerHTML = "";
+}
