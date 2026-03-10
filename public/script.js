@@ -40,6 +40,19 @@ return "en"
 
 }
 
+/* AUTO SCROLL */
+
+function scrollToBottom(){
+
+requestAnimationFrame(()=>{
+chat.scrollTo({
+top:chat.scrollHeight,
+behavior:"smooth"
+})
+})
+
+}
+
 /* ADD MESSAGE */
 
 function addMessage(text, user){
@@ -67,11 +80,7 @@ msg.innerHTML = `
 
 chat.appendChild(msg)
 
-/* AUTO SCROLL FIX */
-
-setTimeout(()=>{
-chat.scrollTop = chat.scrollHeight
-},50)
+scrollToBottom()
 
 }
 
@@ -189,11 +198,7 @@ typing.innerHTML = `
 
 chat.appendChild(typing)
 
-/* SCROLL FIX */
-
-setTimeout(()=>{
-chat.scrollTop = chat.scrollHeight
-},50)
+scrollToBottom()
 
 }
 
@@ -223,8 +228,6 @@ fileInput.onchange = () => {
 const file = fileInput.files[0]
 
 if(!file) return
-
-/* IMAGE PREVIEW */
 
 if(file.type.startsWith("image/")){
 
@@ -298,7 +301,6 @@ const mode = document.getElementById("mode")
 mode.onchange = () => {
 
 const selected = mode.value
-
 console.log("Mode:", selected)
 
 }
