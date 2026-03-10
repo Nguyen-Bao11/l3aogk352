@@ -40,15 +40,24 @@ return "en"
 
 }
 
-/* AUTO SCROLL */
+/* SMART AUTO SCROLL */
 
 function scrollToBottom(){
 
 requestAnimationFrame(()=>{
+
+const isNearBottom =
+chat.scrollHeight - chat.scrollTop - chat.clientHeight < 120
+
+if(isNearBottom){
+
 chat.scrollTo({
 top:chat.scrollHeight,
 behavior:"smooth"
 })
+
+}
+
 })
 
 }
