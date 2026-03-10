@@ -40,28 +40,6 @@ return "en"
 
 }
 
-/* SMART AUTO SCROLL */
-
-function scrollToBottom(){
-
-requestAnimationFrame(()=>{
-
-const isNearBottom =
-chat.scrollHeight - chat.scrollTop - chat.clientHeight < 120
-
-if(isNearBottom){
-
-chat.scrollTo({
-top:chat.scrollHeight,
-behavior:"smooth"
-})
-
-}
-
-})
-
-}
-
 /* ADD MESSAGE */
 
 function addMessage(text, user){
@@ -89,7 +67,11 @@ msg.innerHTML = `
 
 chat.appendChild(msg)
 
-scrollToBottom()
+/* AUTO SCROLL FIX */
+chat.scrollTo({
+top: chat.scrollHeight,
+behavior: "smooth"
+})
 
 }
 
@@ -207,7 +189,7 @@ typing.innerHTML = `
 
 chat.appendChild(typing)
 
-scrollToBottom()
+chat.scrollTop = chat.scrollHeight
 
 }
 
@@ -237,6 +219,8 @@ fileInput.onchange = () => {
 const file = fileInput.files[0]
 
 if(!file) return
+
+/* IMAGE PREVIEW */
 
 if(file.type.startsWith("image/")){
 
@@ -310,6 +294,7 @@ const mode = document.getElementById("mode")
 mode.onchange = () => {
 
 const selected = mode.value
+
 console.log("Mode:", selected)
 
 }
