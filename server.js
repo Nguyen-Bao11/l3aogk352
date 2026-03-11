@@ -1,3 +1,4 @@
+```javascript
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
@@ -143,7 +144,7 @@ app.post("/chat", async (req, res) => {
 
     const userMessage = req.body.message;
     const mode = req.body.mode || "assistant";
-    const userLang = req.body.lang || "en";   // 🔹 LẤY NGÔN NGỮ TỪ FRONTEND
+    const userLang = req.body.lang || "en";
 
     memory.push({
       role: "user",
@@ -156,7 +157,12 @@ app.post("/chat", async (req, res) => {
 
     fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
 
-    const internetInfo = await searchInternet(userMessage);
+    // 🔎 CHỈ SEARCH INTERNET KHI CÂU HỎI THỰC SỰ
+    let internetInfo = "";
+
+    if (userMessage.includes("?") || userMessage.length > 20) {
+      internetInfo = await searchInternet(userMessage);
+    }
 
     const systemPrompt = getModePrompt(mode);
 
@@ -170,20 +176,21 @@ You are Siggy, a mystical AI guide.
 
 Rules:
 - Reply ONLY in this language: ${userLang}
+- If the user greets you, greet them back naturally.
+- Do not explain simple greetings.
 - Never mention language detection.
 - Never say phrases like "I sense you're speaking".
-- Never explain what language you are using.
 - Never mix multiple languages.
 - Answer the user's question directly.
-- Use internet information if helpful.
+- Use internet information only if necessary.
 - Keep responses natural and concise.
 `
       },
 
-      {
+      ...(internetInfo ? [{
         role: "system",
         content: "Internet info:\n" + internetInfo
-      },
+      }] : []),
 
       ...memory
 
@@ -268,3 +275,4 @@ app.get("/chat-data", (req, res) => {
 `);
 
 });
+```
