@@ -143,6 +143,7 @@ app.post("/chat", async (req, res) => {
 
     const userMessage = req.body.message;
     const mode = req.body.mode || "assistant";
+    const userLang = req.body.lang || "en";   // 🔹 LẤY NGÔN NGỮ TỪ FRONTEND
 
     memory.push({
       role: "user",
@@ -168,11 +169,11 @@ app.post("/chat", async (req, res) => {
 You are Siggy, a mystical AI guide.
 
 Rules:
-- Always reply in the same language as the user.
+- Reply ONLY in this language: ${userLang}
 - Never mention language detection.
 - Never say phrases like "I sense you're speaking".
 - Never explain what language you are using.
-- Never mix multiple languages in one sentence.
+- Never mix multiple languages.
 - Answer the user's question directly.
 - Use internet information if helpful.
 - Keep responses natural and concise.
