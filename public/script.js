@@ -371,3 +371,29 @@ overlay.remove()
 }
 
 })
+
+/* VOICE TOGGLE BUTTON */
+
+const voiceToggle = document.getElementById("voiceToggle")
+
+if(voiceToggle){
+
+voiceToggle.onclick = () => {
+
+voiceEnabled = !voiceEnabled
+
+if(voiceEnabled){
+
+voiceToggle.innerText = "🔊"
+
+}else{
+
+voiceToggle.innerText = "🔇"
+
+window.speechSynthesis.cancel()
+
+}
+
+}
+
+}
