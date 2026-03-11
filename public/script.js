@@ -174,10 +174,12 @@ send.onclick = () => {
 
 const text = input.value
 
+if(!text) return
+
+// nếu người dùng gọi pate thì hiện mèo
 if(text.toLowerCase().includes("pate")){
 summonCat()
-
-if(!text) return
+}
 
 hideIntro()
 
