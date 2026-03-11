@@ -520,3 +520,60 @@ opacity:1;
 .title-zone{
 transition:0.4s ease;
 }
+
+/* ===== CAT PATE ANIMATION ===== */
+
+#catOverlay{
+position:fixed;
+bottom:120px;
+left:50%;
+transform:translateX(-50%);
+pointer-events:none;
+z-index:9999;
+}
+
+/* CAT IMAGE */
+
+.cat{
+width:220px;
+opacity:0;
+
+animation:catAppear 0.5s ease forwards,
+           catBite 1.5s ease 0.5s forwards,
+           catExit 0.6s ease 2s forwards;
+}
+
+/* APPEAR */
+
+@keyframes catAppear{
+from{
+opacity:0;
+transform:translate(-50%,40px) scale(0.8);
+}
+to{
+opacity:1;
+transform:translate(-50%,0) scale(1);
+}
+}
+
+/* BITE EFFECT */
+
+@keyframes catBite{
+0%{transform:translate(-50%,0) rotate(0deg);}
+30%{transform:translate(-50%,0) rotate(-10deg);}
+60%{transform:translate(-50%,0) rotate(8deg);}
+100%{transform:translate(-50%,0) rotate(0deg);}
+}
+
+/* EXIT */
+
+@keyframes catExit{
+from{
+opacity:1;
+transform:translate(-50%,0);
+}
+to{
+opacity:0;
+transform:translate(-50%,40px);
+}
+}
