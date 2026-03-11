@@ -1,6 +1,11 @@
 const chat = document.getElementById("chat")
 const input = document.getElementById("input")
 const send = document.getElementById("send")
+const mode = document.getElementById("mode")
+
+/* VOICE REPLY TOGGLE */
+
+let voiceEnabled = true
 
 /* ENTER SEND */
 
@@ -29,11 +34,9 @@ th:/[\u0E00-\u0E7F]/
 }
 
 for(const lang in langMap){
-
 if(langMap[lang].test(text)){
 return lang
 }
-
 }
 
 return "en"
@@ -67,7 +70,6 @@ msg.innerHTML = `
 
 chat.appendChild(msg)
 
-/* AUTO SCROLL FIX */
 chat.scrollTo({
 top: chat.scrollHeight,
 behavior: "smooth"
@@ -75,101 +77,64 @@ behavior: "smooth"
 
 }
 
-/* SEND MESSAGE */
+/* STREAMING TEXT */
 
-send.onclick = () => {
+function typeWriter(text){
 
-const text = input.value
+const msg = document.createElement("div")
 
-if(!text) return
+msg.className = "message"
 
-hideIntro()
+msg.innerHTML = `
+<img class="avatar bot-avatar" src="bot.png">
+<div class="bubble" id="stream"></div>
+`
 
-addMessage(text,true)
+chat.appendChild(msg)
 
-input.value=""
+const bubble = msg.querySelector("#stream")
 
-botTyping()
+let i = 0
 
-const language = detectLanguage(text)
+function typing(){
 
-fetch("/chat",{
+if(i < text.length){
 
-method:"POST",
+bubble.innerHTML += text.charAt(i)
 
-headers:{
-"Content-Type":"application/json"
-},
+i++
 
-body:JSON.stringify({
-message:text,
-lang:language
-})
+chat.scrollTop = chat.scrollHeight
 
-})
-.then(res=>res.json())
-.then(data=>{
+setTimeout(typing,20)
 
-removeTyping()
+}else{
 
-addMessage(data.reply,false)
-
-})
-.catch(err=>{
-
-removeTyping()
-
-addMessage("Siggy lost connection to the arcane realm... ⚡",false)
-
-})
+if(voiceEnabled){
+speak(text)
+}
 
 }
 
-/* LOAD OLD CHAT */
-
-window.onload = function() {
-chat.innerHTML = "";
 }
 
-/* PARTICLES */
+typing()
 
-tsParticles.load("tsparticles",{
-
-particles:{
-number:{value:60},
-color:{value:"#a78bfa"},
-links:{
-enable:true,
-color:"#a78bfa",
-distance:150
-},
-move:{
-enable:true,
-speed:1
-},
-size:{
-value:2
-}
 }
 
-})
+/* VOICE REPLY */
 
-/* INTRO */
+function speak(text){
 
-let startedChat = false
+const speech = new SpeechSynthesisUtterance()
 
-function hideIntro(){
+speech.text = text
+speech.lang = "en-US"
 
-if(startedChat) return
-startedChat = true
+speech.rate = 1
+speech.pitch = 1
 
-document.body.classList.add("chat-mode")
-
-const intro = document.querySelector(".title-zone")
-
-if(intro){
-intro.classList.add("hide")
-}
+window.speechSynthesis.speak(speech)
 
 }
 
@@ -203,15 +168,115 @@ typing.remove()
 
 }
 
+/* SEND MESSAGE */
+
+send.onclick = () => {
+
+const text = input.value
+
+if(!text) return
+
+hideIntro()
+
+addMessage(text,true)
+
+input.value=""
+
+botTyping()
+
+const language = detectLanguage(text)
+
+const selectedMode = mode.value
+
+fetch("/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+message:text,
+lang:language,
+mode:selectedMode
+})
+
+})
+.then(res=>res.json())
+.then(data=>{
+
+removeTyping()
+
+typeWriter(data.reply)
+
+})
+.catch(err=>{
+
+removeTyping()
+
+addMessage("Siggy lost connection to the arcane realm... ⚡",false)
+
+})
+
+}
+
+/* LOAD OLD CHAT */
+
+window.onload = function() {
+chat.innerHTML = ""
+}
+
+/* PARTICLES */
+
+tsParticles.load("tsparticles",{
+
+particles:{
+number:{value:60},
+color:{value:"#a78bfa"},
+links:{
+enable:true,
+color:"#a78bfa",
+distance:150
+},
+move:{
+enable:true,
+speed:1
+},
+size:{
+value:2
+}
+}
+
+})
+
+/* INTRO */
+
+let startedChat = false
+
+function hideIntro(){
+
+if(startedChat) return
+
+startedChat = true
+
+document.body.classList.add("chat-mode")
+
+const intro = document.querySelector(".title-zone")
+
+if(intro){
+intro.classList.add("hide")
+}
+
+}
+
 /* FILE UPLOAD */
 
 const attach = document.getElementById("attach")
 const fileInput = document.getElementById("fileInput")
 
 attach.onclick = () => {
-
 fileInput.click()
-
 }
 
 fileInput.onchange = () => {
@@ -219,8 +284,6 @@ fileInput.onchange = () => {
 const file = fileInput.files[0]
 
 if(!file) return
-
-/* IMAGE PREVIEW */
 
 if(file.type.startsWith("image/")){
 
@@ -245,7 +308,7 @@ addMessage("📎 " + file.name, true)
 
 }
 
-/* VOICE */
+/* VOICE INPUT */
 
 const voice = document.getElementById("voice")
 
@@ -276,26 +339,12 @@ recognition.onresult = (event) => {
 let text=""
 
 for(let i=0;i<event.results.length;i++){
-
 text += event.results[i][0].transcript
-
 }
 
 input.value = text
 
 }
-
-}
-
-/* MODE SELECT */
-
-const mode = document.getElementById("mode")
-
-mode.onchange = () => {
-
-const selected = mode.value
-
-console.log("Mode:", selected)
 
 }
 
@@ -306,6 +355,7 @@ document.addEventListener("click", function(e){
 if(e.target.tagName === "IMG" && e.target.closest(".bubble")){
 
 const overlay = document.createElement("div")
+
 overlay.className = "image-overlay"
 
 overlay.innerHTML = `
