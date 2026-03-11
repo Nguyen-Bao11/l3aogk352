@@ -174,6 +174,9 @@ send.onclick = () => {
 
 const text = input.value
 
+if(text.toLowerCase().includes("pate")){
+summonCat()
+
 if(!text) return
 
 hideIntro()
