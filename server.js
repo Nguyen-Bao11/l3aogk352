@@ -23,7 +23,7 @@ console.log(
   process.env.OPENROUTER_API_KEY ? "Loaded ✅" : "Missing ❌"
 );
 
-// 🔄 Auto Update khi khởi động
+// 🔄 Auto Update
 autoUpdate();
 
 
@@ -31,6 +31,7 @@ autoUpdate();
 // 🌐 GOOGLE SEARCH
 // =============================
 async function googleSearch(query) {
+
   try {
 
     if (!process.env.GOOGLE_API_KEY || !process.env.GOOGLE_CX) {
@@ -54,6 +55,7 @@ async function googleSearch(query) {
     console.log("Google search error:", err);
     return "Google search failed.";
   }
+
 }
 
 
@@ -106,6 +108,33 @@ ${duck}`;
 
 
 // =============================
+// 🤖 MODE SYSTEM
+// =============================
+function getModePrompt(mode) {
+
+  switch (mode) {
+
+    case "creative":
+      return "You are a creative storyteller AI. Use imagination.";
+
+    case "coder":
+      return "You are an expert programming assistant.";
+
+    case "ritual":
+      return "You are a mystical ritual guide speaking poetically.";
+
+    case "assistant":
+      return "You are a helpful AI assistant.";
+
+    default:
+      return "You are Siggy, a mystical AI guide.";
+
+  }
+
+}
+
+
+// =============================
 // 💬 CHAT API
 // =============================
 app.post("/chat", async (req, res) => {
@@ -113,8 +142,9 @@ app.post("/chat", async (req, res) => {
   try {
 
     const userMessage = req.body.message;
+    const mode = req.body.mode || "assistant";
 
-    // lưu memory
+    // lưu memory user
     memory.push({
       role: "user",
       content: userMessage
@@ -127,20 +157,22 @@ app.post("/chat", async (req, res) => {
 
     fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
 
-    // lấy info internet
+    // lấy internet info
     const internetInfo = await searchInternet(userMessage);
+
+    const systemPrompt = getModePrompt(mode);
 
     const messages = [
 
       {
         role: "system",
-        content: `You are Siggy, a mystical AI guide.
+        content: `${systemPrompt}
 
 Rules:
 - Detect user's language
-- Always reply same language
+- Reply same language
 - Use internet info if useful
-- Be wise and helpful`
+- Be helpful and clear`
       },
 
       {
@@ -170,10 +202,13 @@ Rules:
     const data = await response.json();
 
     if (!data.choices) {
+
       console.log(data);
+
       return res.json({
         reply: "⚠ AI connection failed."
       });
+
     }
 
     const aiReply = data.choices[0].message.content;
@@ -209,7 +244,9 @@ Rules:
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
+
   console.log("🚀 Siggy running on port", PORT);
+
 });
 
 
