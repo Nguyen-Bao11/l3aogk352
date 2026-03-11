@@ -37,6 +37,7 @@
 
 </header>
 
+
 <main class="center">
 
 <div class="title-zone">
@@ -65,12 +66,12 @@ Siggy loves everyone, so ask and Siggy will answer.
 <input id="input" placeholder="Ask anything"/>
 
 <select id="mode">
-<option>Auto</option>
-<option>Fast</option>
-<option>Smart</option>
+<option value="auto">Auto</option>
+<option value="fast">Fast</option>
+<option value="smart">Smart</option>
 </select>
 
-<!-- MICROPHONE ICON -->
+<!-- VOICE INPUT (MIC) -->
 
 <button id="voice" class="voice-btn">
 
@@ -80,9 +81,16 @@ Siggy loves everyone, so ask and Siggy will answer.
 
 </button>
 
+<!-- VOICE REPLY TOGGLE -->
+
+<button id="voiceToggle" class="tool-btn">
+🔊
+</button>
+
 <button id="send">➤</button>
 
 </div>
+
 
 <input type="file" id="fileInput" style="display:none">
 
