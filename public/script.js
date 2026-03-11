@@ -397,3 +397,19 @@ window.speechSynthesis.cancel()
 }
 
 }
+
+/* ===== CAT PATE EFFECT ===== */
+
+function summonCat(){
+
+const overlay = document.getElementById("catOverlay")
+
+overlay.innerHTML = `
+<img src="cat.png" class="cat">
+`
+
+setTimeout(()=>{
+overlay.innerHTML=""
+},2600)
+
+}
