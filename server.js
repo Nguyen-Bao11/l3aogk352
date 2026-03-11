@@ -144,20 +144,17 @@ app.post("/chat", async (req, res) => {
     const userMessage = req.body.message;
     const mode = req.body.mode || "assistant";
 
-    // lưu memory user
     memory.push({
       role: "user",
       content: userMessage
     });
 
-    // giới hạn memory
     if (memory.length > 20) {
       memory.shift();
     }
 
     fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
 
-    // lấy internet info
     const internetInfo = await searchInternet(userMessage);
 
     const systemPrompt = getModePrompt(mode);
@@ -168,11 +165,18 @@ app.post("/chat", async (req, res) => {
         role: "system",
         content: `${systemPrompt}
 
+You are Siggy, a mystical AI guide.
+
 Rules:
-- Detect user's language
-- Reply same language
-- Use internet info if useful
-- Be helpful and clear`
+- Always reply in the same language as the user.
+- Never mention language detection.
+- Never say phrases like "I sense you're speaking".
+- Never explain what language you are using.
+- Never mix multiple languages in one sentence.
+- Answer the user's question directly.
+- Use internet information if helpful.
+- Keep responses natural and concise.
+`
       },
 
       {
@@ -194,7 +198,9 @@ Rules:
         },
         body: JSON.stringify({
           model: "meta-llama/llama-3.1-8b-instruct",
-          messages: messages
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 800
         })
       }
     );
@@ -213,7 +219,6 @@ Rules:
 
     const aiReply = data.choices[0].message.content;
 
-    // lưu reply
     memory.push({
       role: "assistant",
       content: aiReply
